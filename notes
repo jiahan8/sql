@@ -1,16 +1,40 @@
 
+select from where 
+group by having order by limit
 
 sql distinct vs group by
-delete table vs truncate table in mysql
+distinct - 
+group by - used with aggregate functions, eg count(column1) in select, to get the count specifically for each group
 
-where vs having count - use having count for aggregate functions
+delete table vs truncate table in mysql (remove data in the table)
+delete - can roll back
+truncate - faster
+
+where vs having count 
+use having count for aggregate functions
 
 sql view
-sql self join
 
 sql functions
+max, min, sum, avg, count
+if
+ifnull
+case when … then …
+
+sql self join
+from table1 a, table2 b
+
+inner join vs natural join
+inner join (better to maintain ??, sometimes the column can also connect to other table then changing data can affect the joined table) - does not combine the same column
+natural join - combine the same column
+
+primary key, super key, candidate key
+primary key - unique
+super key - primary key, and (primary key, column1), (primary key, column1, column2) ….
+candidate key - shortest super key (primary key), so candidate key = primary key
 
 
+1nf, 2nf, 3nf
 
 
 
