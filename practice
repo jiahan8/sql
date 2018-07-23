@@ -1,1 +1,468 @@
 
+
+2
+SELECT name, continent, population FROM world
+SELECT name FROM world WHERE population >= 200000000
+select name, gdp/population from world where population >= 200000000
+select name, population/1000000 from world where continent='South America'
+select name, population from world where name in ('France', 'germany', 'Italy')
+select name from world where name like '%United%'
+select name, population, area from world where area > 3000000 or population > 250000000
+
+use xor
+select name, population, area from world where (area> 3000000)^(population> 250000000)
+use round
+select name, round(population/1000000, 2), round(gdp/1000000000, 2) from world where continent = 'south america'
+select name , round( gdp/population, -3 ) from world where gdp >= 1000000000000
+use length
+SELECT name, capital FROM world WHERE length(name) = length(capital)
+use left
+SELECT name, capital FROM world where left(name, 1) = left(capital, 1) and name != capital
+SELECT name FROM world WHERE name LIKE '%a%' and name like '%e%' and name like '%i%' and name like '%o%' and name like '%u%' and name NOT like '% %'
+
+3
+SELECT yr, subject, winner FROM nobel WHERE yr = 1950
+SELECT winner FROM nobel WHERE yr = 1962 AND subject = 'literature'
+select yr, subject from nobel where winner='Albert Einstein'
+select winner from nobel where yr >= 2000 and subject='peace'
+select yr, subject, winner from nobel where yr between 1980 and 1989 and subject='literature'
+SELECT * FROM nobel WHERE winner like '%theodore roosevelt%' or winner like 'woodrow wilson%' or winner like '%carter%' or winner like '%barack%'
+select winner from nobel where winner like 'john%'
+
+and or and
+select yr, subject, winner from nobel where subject = 'physics' and yr = 1980 or subject = 'chemistry' and yr = 1984
+select yr, subject, winner from nobel where yr=1980 and subject not in ('chemistry', 'medicine')
+select yr, subject, winner from nobel where ( subject = 'medicine' and yr < 1910) or (subject='literature' and yr >= 2004)
+
+Umlaut
+select * from nobel where winner like 'peter gr%'
+Apostrophe
+You can't put a single quote in a quote string directly. You can use two single quotes within a quoted string.
+select * from nobel where winner like 'eugene o%'
+Knights of the realm
+select winner, yr, subject from nobel where winner like 'sir%' order by yr desc, winner
+
+Chemistry and Physics last
+SELECT winner, subject
+  FROM nobel
+ WHERE yr=1984
+ ORDER BY 
+case when subject in ('chemistry' , 'physics') then 1 else 0 end,
+subject, winner
+
+3
+nobel quiz
+select count( distinct yr) from nobel where 
+yr in
+(select distinct yr from nobel where subject != 'medicine')
+SELECT COUNT(DISTINCT yr) FROM nobel
+ WHERE yr NOT IN (SELECT DISTINCT yr FROM nobel WHERE subject = 'Medicine')
+
+select yr from nobel where
+yr in
+(select distinct yr from nobel where subject != 'chemistry' and subject != 'physics')
+select yr from nobel where
+yr not in
+(select yr from nobel where subject = 'chemistry' or subject = 'physics')
+SELECT yr FROM nobel
+ WHERE yr NOT IN(SELECT yr 
+                   FROM nobel
+                 WHERE subject IN ('Chemistry','Physics'))
+
+select yr from nobel where
+yr in
+(select distinct yr from nobel where subject = 'medicine' and subject != 'peace' and subject != 'literature')
+SELECT DISTINCT yr
+  FROM nobel
+ WHERE subject='Medicine' 
+   AND yr NOT IN(SELECT yr FROM nobel 
+                  WHERE subject='Literature' or subject='Peace' )
+SELECT DISTINCT yr
+  FROM nobel
+ WHERE subject='Medicine' 
+   AND yr NOT IN(SELECT yr FROM nobel 
+                  WHERE subject='Literature')
+   AND yr NOT IN (SELECT yr FROM nobel
+                   WHERE subject='Peace')
+
+4
+richer than uk
+select name from world where continent='europe' and gdp/population > (select gdp/population from world where name='united kingdom')
+
+select name, continent from world where continent ='south america'  or continent='oceania' order by name 
+select name, continent from world where continent in (select continent from world where name = 'argentina' or name = 'australia' ) order by name
+
+between inclusive
+select name, population from world where population > (select population from world where name='canada') and population < (select population from world where name='poland')
+
+multiple like
+
+sql concat
+round
+percentages of germany
+select name, concat( round( population/(select population from world where name='germany')*100, 0 ), '%') from world where continent='europe'
+
+Bigger than every country in Europe
+select name from world where gdp > all (select gdp from world where gdp > 0 and continent='europe')
+or
+select name from world where gdp > (select max(gdp) from world where gdp > 0 and continent='europe')
+
+correlated subquery
+SELECT name
+  FROM bbc b1
+ WHERE population> 
+  5*(SELECT AVG(population) FROM bbc
+     WHERE region=b1.region)
+
+
+Largest in each continent
+The above example is known as a correlated or synchronized sub-query.
+Using correlated subqueries
+A correlated subquery works like a nested loop: the subquery only has access to rows related to a single record at a time in the outer query. The technique relies on table aliases to identify two different uses of the same table, one in the outer query and the other in the subquery.
+One way to interpret the line in the WHERE clause that references the two table is “… where the correlated values are the same”.
+In the example provided, you would say “select the country details from world where the population is greater than or equal to the population of all countries where the continent is the same”.
+SELECT continent, name, area FROM world x
+  WHERE area >= ALL
+    (SELECT area FROM world y
+        WHERE y.continent=x.continent
+          AND area>0)
+
+
+￼
+
+
+First country of each continent (alphabetically)
+select continent, name from world group by continent order by name limit 1
+use all
+select continent, name from world x where name <= all (select name from world y where x.continent = y.continent)
+
+Difficult Questions That Utilize Techniques Not Covered In Prior Sections
+Find the continents where all countries have a population <= 25000000. Then find the names of the countries associated with these continents. Show name, continent and population.
+select name, continent, population from world x where continent = all (select continent from world where (select population from world where continent) population <= 25000000 
+select name, continent, population from world x where 25000000 > all (select population from world y where x.continent=y.continent)
+
+3 times population
+Some countries have populations more than three times that of any of their neighbours (in the same continent). Give the countries and continents.
+select name, continent from world x where population >= all (select 3*population from world as y where x.continent=y.continent and x.name != y.name)
+
+
+4
+nested select quiz
+3. Select the code that shows the countries with a less than a third of the population of the countries around it
+select name, region from world x where population/3 > all (select population from world y where x.region = y.region and population > 0)
+SELECT name, region FROM bbc x WHERE population < ALL (SELECT population/3 FROM bbc y WHERE y.region = x.region AND y.name != x.name)
+
+
+5. Select the code that would show the countries with a greater GDP than any country in Africa (some countries may have NULL gdp values).
+select name from world where gdp > all (select name from world where region=‘africa’ and gdp > 0)
+SELECT name FROM bbc WHERE gdp > (SELECT MAX(gdp) FROM bbc WHERE region = 'Africa')
+
+
+between smaller value and bigger value
+6. Select the code that shows the countries with population smaller than Russia but bigger than Denmark
+select name from world where population < (select population from world where name=‘russia’ ) and population > (select population from world where name=‘denmark’)
+select name from world where population between (select population from world where name=‘russia’ ) and (select population from world where name=‘denmark’)
+SELECT name FROM bbc WHERE population < (SELECT population FROM bbc WHERE name='Russia') AND population > (SELECT population FROM bbc WHERE name='Denmark')
+
+
+
+5.
+sum and count
+
+For each continent show the continent and number of countries with populations of at least 10 million.
+select continent, count(name) from world where population>=10000000 group by continent
+
+List the continents that have a total population of at least 100 million.
+select continent from world group by continent having sum(population) >= 100000000
+
+
+5
+practice sum and count functions
+SELECT COUNT(subject) FROM nobel
+select distinct subject from nobel
+select count(subject) from nobel where subject = 'physics'
+select subject, count(winner) from nobel group by subject
+select subject, min(yr) from nobel group by subject 
+select subject, count(winner) from nobel  where yr=2000 group by subject
+select subject, count( distinct winner) from nobel group by subject
+select subject , count(distinct yr) from nobel group by subject
+ 
+Show the years in which three prizes were given for Physics.
+select yr from nobel where (subject) = 'physics' group by yr having count(*) = 3
+
+* or subject
+select winner from nobel group by winner having count(*) > 1
+
+select winner from nobel group by winner having count( distinct subject) > 1
+
+Show the year and subject where 3 prizes were given. Show only years 2000 onwards.
+select yr, subject from nobel where yr >= 2000 group by yr, subject having count(subject) = 3
+
+
+
+6
+join
+
+SELECT matchid, player FROM goal WHERE teamid = 'ger'
+SELECT id,stadium,team1,team2 FROM game where id=1012
+SELECT player,teamid, stadium, mdate FROM game JOIN goal ON (id=matchid) where teamid='ger'
+select team1, team2, player from game join goal on id=matchid where player like 'mario%'
+SELECT player, teamid, coach, gtime FROM goal  join eteam on teamid=id WHERE gtime<=10
+
+select mdate, teamname from game join eteam on team1=eteam.id where coach='fernando santos'
+select player from game join goal on id=matchid where stadium like  '%warsaw'
+
+
+8. difficult questions
+Instead show the name of all players who scored a goal against Germany.
+SELECT distinct player
+  FROM game JOIN goal ON matchid = id 
+    WHERE teamid != 'ger' and (team1 = 'ger' or team2='ger')
+
+Show teamname and the total number of goals scored.
+or add distinct on teamname
+SELECT teamname, count(player)
+  FROM eteam JOIN goal ON id=teamid
+group by teamname
+ ORDER BY teamname
+
+select stadium, count(player) from game join goal on matchid=id group by stadium
+
+why need multiple group by
+SELECT matchid, mdate, count(player)
+  FROM game JOIN goal ON matchid = id 
+ WHERE (team1 = 'POL' OR team2 = 'POL') group by matchid, mdate
+
+select matchid, mdate, count(player) from game join goal on matchid=id where teamid='ger' group by matchid, mdate
+
+case when
+SELECT mdate,
+team1,
+  sum(CASE WHEN teamid=team1 THEN 1 ELSE 0 END) score1,
+team2,
+  sum(CASE WHEN teamid=team2 THEN 1 ELSE 0 END) score2
+FROM game left JOIN goal ON matchid = id
+group by mdate, team1, team2
+order by mdate, matchid, team1, team2
+
+
+join quiz
+3. Select the code which shows players, their team and the amount of goals they scored against Greece(GRE).
+select player, teamid, count(*) from game join goal on team id=matchid 
+SELECT player, teamid, COUNT(*)
+  FROM game JOIN goal ON matchid = id
+ WHERE (team1 = "GRE" OR team2 = "GRE")
+   AND teamid != 'GRE'
+ GROUP BY player, teamid
+
+6. Select the code which shows the player, their team and the time they scored, for players who have played in Stadion Miejski (Wroclaw) but not against Italy(ITA).
+SELECT DISTINCT player, teamid, gtime
+  FROM game JOIN goal ON matchid = id
+ WHERE stadium = 'Stadion Miejski (Wroclaw)'
+   AND (( teamid = team2 AND team1 != 'ITA') OR ( teamid = team1 AND team2 != 'ITA'))
+
+
+7
+more join
+6. Obtain the cast list for 'Casablanca'.
+join 3 tables
+select name
+from movie JOIN casting ON movie.id=movieid JOIN actor ON actorid=actor.id
+where movie.id=11768
+
+List the films where 'Harrison Ford' has appeared - but not in the starring role. [Note: the ord field of casting gives the position of the actor. If ord=1 then this actor is in the starring role]
+select title
+from movie JOIN casting ON movie.id=movieid JOIN actor ON actorid=actor.id
+where name='harrison ford' and ord != 1
+
+List the films together with the leading star for all 1962 films.
+select title, name
+from movie JOIN casting ON movie.id=movieid JOIN actor ON actorid=actor.id
+where yr=1962 and ord=1
+
+harder questions
+Which were the busiest years for 'John Travolta', show the year and the number of movies he made each year for any year in which he made more than 2 movies.
+SELECT yr, COUNT(title) FROM
+  movie JOIN casting ON movie.id=movieid
+         JOIN actor   ON actorid=actor.id
+where name='John Travolta'
+GROUP BY yr
+HAVING COUNT(title)=(SELECT MAX(c) FROM
+(SELECT yr, COUNT(title) AS c FROM
+   movie JOIN casting ON movie.id=movieid
+         JOIN actor   ON actorid=actor.id
+ where name='John Travolta'
+ GROUP BY yr) AS t
+)
+
+
+*
+List the film title and the leading actor for all of the films 'Julie Andrews' played in.
+SELECT title, name FROM
+movie join casting on (movie.id=movieid and ord=1)
+join actor on actorid=actor.id
+WHERE movieid IN (
+  SELECT movieid FROM casting
+  WHERE name='Julie Andrews' )
+SELECT title, name FROM
+movie join casting on (movie.id=movieid and ord=1)
+join actor on actorid=actor.id
+WHERE movie.id IN (
+  SELECT movieid FROM casting
+  WHERE actorid in ( select id from actor where name='julie andrews')
+)
+
+
+
+Obtain a list, in alphabetical order, of actors who've had at least 30 starring roles.
+select name
+from
+movie join casting on movie.id=movieid
+join actor on actorid=actor.id
+where ord=1
+group by name
+having count(movieid)>=30
+order by name
+
+List the films released in the year 1978 ordered by the number of actors in the cast, then by title.
+select title, count(actorid)
+from
+movie join casting on movie.id=movieid
+join actor on actorid=actor.id
+where yr=1978
+group by title
+order by count(actorid) desc, title
+
+
+* completed
+List all the people who have worked with 'Art Garfunkel'.
+select actor.name
+from
+movie join casting on movie.id=movieid
+join actor on actorid=actor.id
+movieid in (select movieid from movie where actor.name='art garfunkel')
+select actor.name
+from movie 
+join casting on (movieid=movie.id) join actor on (actorid=actor.id)
+where movieid in 
+(select movieid from casting where actorid in 
+(select id from actor where name='art Garfunkel' ) and name != 'art Garfunkel' )
+
+
+
+8
+using null
+Use the COALESCE function and a LEFT JOIN to print the teacher name and department name. Use the string 'None' where there is no department.
+select teacher.name, ifnull(dept.name , 'None') from teacher left join dept on dept=dept.id 
+
+Use COUNT to show the number of teachers and the number of mobile phones.
+select count(teacher.name), count(mobile) from teacher left join dept on dept=dept.id 
+
+Use COUNT and GROUP BY dept.name to show each department and the number of staff. Use a RIGHT JOIN to ensure that the Engineering department is listed.
+select dept.name , count(teacher.dept) from teacher right join dept on dept=dept.id group by dept.name
+
+
+using case
+Use CASE to show the name of each teacher followed by 'Sci' if the teacher is in dept 1 or 2 and 'Art' otherwise.
+select teacher.name , 
+CASE WHEN dept.id = 1
+            THEN 'Sci'
+            WHEN dept.id = 2
+            THEN 'Sci'
+            ELSE 'Art'
+       END
+from teacher left join dept on dept=dept.id group by teacher.name, dept.id 
+
+
+Use CASE to show the name of each teacher followed by 'Sci' if the teacher is in dept 1 or 2, show 'Art' if the teacher's dept is 3 and 'None' otherwise.
+select teacher.name , 
+CASE WHEN dept.id = 1
+            THEN 'Sci'
+            WHEN dept.id = 2
+            THEN 'Sci'
+when dept.id = 3
+            then 'Art'
+else 'None'
+       END
+from teacher left join dept on dept=dept.id group by teacher.name, dept.id 
+
+
+
+9
+self join
+
+Give the id and the name for the stops on the '4' 'LRT' service.
+select id, name from stops join route on route.stop=stops.id where num=4 and company='lrt'
+
+
+Routes and stops
+The query shown gives the number of routes that visit either London Road (149) or Craiglockhart (53). Run the query and notice the two services that link these stopshave a count of 2. Add a HAVING clause to restrict the output to these two routes.
+SELECT company, num, COUNT(*)
+FROM route WHERE stop=149 OR stop=53
+GROUP BY company, num
+having count(*) = 2
+
+Execute the self join shown and observe that b.stop gives all the places you can get to from Craiglockhart, without changing routes. Change the query so that it shows the services from Craiglockhart to London Road.
+SELECT a.company, a.num, a.stop, b.stop
+FROM route a JOIN route b ON
+  (a.company=b.company AND a.num=b.num)
+WHERE a.stop=53 and b.stop='149'
+
+
+The query shown is similar to the previous one, however by joining two copies of the stops table we can refer to stops by name rather than by number. Change the query so that the services between 'Craiglockhart' and 'London Road' are shown. If you are tired of these places try 'Fairmilehead' against 'Tollcross'
+SELECT a.company, a.num, stopa.name, stopb.name
+FROM route a JOIN route b ON
+  (a.company=b.company AND a.num=b.num)
+  JOIN stops stopa ON (a.stop=stopa.id)
+  JOIN stops stopb ON (b.stop=stopb.id)
+WHERE stopa.name='Craiglockhart' and stopb.name='london road'
+
+
+Using a self join
+Give a list of all the services which connect stops 115 and 137 ('Haymarket' and 'Leith')
+SELECT a.company, a.num
+FROM route a JOIN route b ON
+  (a.company=b.company AND a.num=b.num)
+  JOIN stops stopa ON (a.stop=stopa.id)
+  JOIN stops stopb ON (b.stop=stopb.id)
+WHERE stopa.name='haymarket' and stopb.name='leith'
+group by num, company
+
+
+Give a list of the services which connect the stops 'Craiglockhart' and 'Tollcross'
+SELECT a.company, a.num
+FROM route a JOIN route b ON
+  (a.company=b.company AND a.num=b.num)
+  JOIN stops stopa ON (a.stop=stopa.id)
+  JOIN stops stopb ON (b.stop=stopb.id)
+WHERE stopa.name='craiglockhart' and stopb.name='tollcross'
+group by num, company
+
+
+Give a distinct list of the stops which may be reached from 'Craiglockhart' by taking one bus, including 'Craiglockhart' itself, offered by the LRT company. Include the company and bus no. of the relevant services.
+SELECT stopa.name, a.company, a.num
+FROM route a JOIN route b ON
+  (a.company=b.company AND a.num=b.num)
+  JOIN stops stopa ON (a.stop=stopa.id)
+  JOIN stops stopb ON (b.stop=stopb.id)
+WHERE stopa.name='Craiglockhart' or stopb.name='Craiglockhart'
+group by name , num, company
+
+
+Find the routes involving two buses that can go from Craiglockhart to Sighthill. Show the bus no. and company for the first bus, the name of the stop for the transfer, and the bus no. and company for the second bus.
+Hint
+Self-join twice to find buses that visit Craiglockhart and Sighthill, then join those on matching stops.
+
+SELECT DISTINCT bus1.num, bus1.company, name, bus2.num, bus2.company FROM (
+SELECT start1.num, start1.company, stop1.stop FROM route AS start1 JOIN route AS stop1 
+ON start1.num = stop1.num 
+AND start1.company = stop1.company AND start1.stop != stop1.stop WHERE start1.stop = 
+(SELECT id FROM stops WHERE name = 'Craiglockhart')) AS bus1 JOIN (SELECT start2.num, start2.company, start2.stop FROM route AS start2 JOIN route AS stop2 ON start2.num = stop2.num AND start2.company = stop2.company AND start2.stop != stop2.stop WHERE stop2.stop = (SELECT id FROM stops WHERE name = 'Sighthill')) AS bus2 ON bus1.stop = bus2.stop JOIN stops ON bus1.stop = stops.id
+
+
+
+
+
+
+
+
