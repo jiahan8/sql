@@ -1,6 +1,5 @@
 
-select from where 
-group by having order by limit
+select from where group by having order by limit
 
 sql distinct vs group by
 distinct - 
@@ -13,16 +12,69 @@ truncate - faster
 where vs having count 
 use having count for aggregate functions
 
-sql view
+*
+sql views
+dynamic, automatic update table
+does not use extra memory
+create view view1 as select concat(column1, ‘,’ , column2) as name1 from table1
 
 sql functions
 max, min, sum, avg, count
 if
 ifnull
 case when … then …
+distinct
+limit num / limit index, range
+in / not in
+custom column - concat( column1, ‘, ’ , column2) / column2 +/-/*// 1 / as column_name / 
+upper( column1 )
+sqrt( column1 )
+any / all
+
+technique - subquery,
+		join (inner join) (from table1 join table2 where id=id / from table1, table2 where id=id), 
+		left join ( … from table1 left join on table2 … ) (list all values of selected column of table1, then list values associated with it) - left side of the joined table (table1) will not have null, but right side (table2) may contains null, 
+		right join - right side of the joined table (table2) will not have null, but left side (table2) may contains null, 
+		full join, 
+		self join (from table1 a, table1 b), 
+		natural join, 
+		nested select,
+		select union (distinct) select, select union all (contains duplicates) select
+
+*
+regular expression
+regexp
+
+like ‘%a_’ - case insensitive
+% - 0 to multiple chars
+_ - exactly 1 char
 
 sql self join
-from table1 a, table2 b
+from table1 a, table1 b
+
+sql in vs sub query select
+column1 >= in ( select column1 from … )
+
+sql where and vs union / union all
+union - easier if involves multiple tables, must use the same select columns in different select query
+
+full-text searching vs like
+full-text searching - faster
+run: alter table table1 add fulltext( column1 )
+select column1, column2 from table1 where match(column1) against(‘text’)
+select column1, column2 from table1 where match(column1) against(‘+text1 -text2’ IN BOOLEAN MODE)
+
+insert into
+insert into table1 values(column1, … )
+insert into table1 (column1, … ) values ( ‘value1’, … )
+insert into table1 (column1, … ) values ( ‘value1’, … ), (‘value2’, …), …
+insert into table1 (column1, … ) select column1, … from table2
+
+update
+update table1 set column1=‘value1’ , column2=‘value2’ where id (usually use primary key) = value3
+
+delete
+delete from table1 where id (usually use primary key) = value3
 
 inner join vs natural join
 inner join (better to maintain ??, sometimes the column can also connect to other table then changing data can affect the joined table) - does not combine the same column
@@ -35,6 +87,13 @@ candidate key - shortest super key (primary key), so candidate key = primary key
 
 
 1nf, 2nf, 3nf
+
+
+
+
+
+
+
 
 
 
