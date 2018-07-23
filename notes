@@ -76,6 +76,21 @@ update table1 set column1=‘value1’ , column2=‘value2’ where id (usually 
 delete
 delete from table1 where id (usually use primary key) = value3
 
+create
+create table table1(
+id int,
+username varchar(20),
+PRIMARY KEY(id)
+)
+
+not null
+auto increment
+id int NOT NULL AUTO_INCREMENT
+
+alter table table1 drop column column1
+drop table table1
+rename table table1 to table2
+
 inner join vs natural join
 inner join (better to maintain ??, sometimes the column can also connect to other table then changing data can affect the joined table) - does not combine the same column
 natural join - combine the same column
@@ -87,10 +102,6 @@ candidate key - shortest super key (primary key), so candidate key = primary key
 
 
 1nf, 2nf, 3nf
-
-
-
-
 
 
 
