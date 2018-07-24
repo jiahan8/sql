@@ -9,8 +9,9 @@ delete table vs truncate table in mysql (remove data in the table)
 delete - can roll back
 truncate - faster
 
-where vs having count 
-use having count for aggregate functions
+where vs having 
+use having for aggregate functions, use with group by
+eg. having count(column1) > value1
 
 *
 sql views
@@ -20,9 +21,9 @@ create view view1 as select concat(column1, ‘,’ , column2) as name1 from tab
 
 sql functions
 max, min, sum, avg, count
-if
-ifnull
-case when … then …
+if( condition, value_if_true, value_if_false)
+ifnull( expression, value_if_exp_isnull )
+case when … then … else … end
 distinct
 limit num / limit index, range
 in / not in
@@ -30,6 +31,8 @@ custom column - concat( column1, ‘, ’ , column2) / column2 +/-/*// 1 / as co
 upper( column1 )
 sqrt( column1 )
 any / all
+BETWEEN is inclusive
+offset index_value, eg. offset 1 to get the value of the second row
 
 technique - subquery,
 		join (inner join) (from table1 join table2 where id=id / from table1, table2 where id=id), 
@@ -39,7 +42,7 @@ technique - subquery,
 		self join (from table1 a, table1 b), 
 		natural join, 
 		nested select,
-		select union (distinct) select, select union all (contains duplicates) select
+		select union (distinct) select, eg. select union all (contains duplicates) select
 
 *
 regular expression
@@ -57,6 +60,9 @@ column1 >= in ( select column1 from … )
 
 sql where and vs union / union all
 union - easier if involves multiple tables, must use the same select columns in different select query
+
+sql exists vs in
+exists - tell if the select return any results, faster
 
 full-text searching vs like
 full-text searching - faster
